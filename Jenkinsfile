@@ -18,9 +18,10 @@ pipeline {
                 dir('GridLayouts') {
                     bat "${MAVEN_HOME}/bin/mvn clean test"
                     withSonarQubeEnv('SonarQube') {
+                        // Use double quotes with backslashes for Windows compatibility
                         bat "${MAVEN_HOME}/bin/mvn sonar:sonar " +
                             "-Dsonar.projectKey=GridLayouts_Task " +
-                            "-Dsonar.projectName='GridLayouts Task' " +
+                            "-Dsonar.projectName=\"GridLayouts Task\" " +
                             "-Dsonar.sources=src/main/java " +
                             "-Dsonar.java.binaries=target/classes"
                     }
@@ -30,13 +31,12 @@ pipeline {
 
         stage('Aggregation Task') {
             steps {
-                // This MUST match your folder name 'AggregationDemo' exactly
                 dir('AggregationDemo') {
                     bat "${MAVEN_HOME}/bin/mvn clean test"
                     withSonarQubeEnv('SonarQube') {
                         bat "${MAVEN_HOME}/bin/mvn sonar:sonar " +
                             "-Dsonar.projectKey=Aggregation_Demo_Task " +
-                            "-Dsonar.projectName='Aggregation Demo' " +
+                            "-Dsonar.projectName=\"Aggregation Demo\" " +
                             "-Dsonar.sources=src/main/java " +
                             "-Dsonar.java.binaries=target/classes"
                     }
@@ -49,7 +49,7 @@ pipeline {
                 expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {
-                echo "All tasks passed successfully. Portfolio updated."
+                echo "All tasks passed successfully."
             }
         }
     }
@@ -62,7 +62,7 @@ pipeline {
             echo "SUCCESS: Both GridLayouts and AggregationDemo are verified!"
         }
         failure {
-            echo "FAILURE: Please check the logs to see which task failed."
+            echo "FAILURE: Check Maven parameters for syntax errors."
         }
     }
 }
