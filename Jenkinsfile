@@ -13,7 +13,6 @@ pipeline {
             }
         }
 
-        // --- GRID LAYOUTS SECTION ---
         stage('GridLayouts Task') {
             steps {
                 dir('GridLayouts') {
@@ -29,16 +28,15 @@ pipeline {
             }
         }
 
-        // --- NEW: AGGREGATION TASK SECTION ---
         stage('Aggregation Task') {
             steps {
-                // Ensure 'AggregationTask' matches your folder name exactly!
-                dir('AggregationTask') {
+                // This MUST match your folder name 'AggregationDemo' exactly
+                dir('AggregationDemo') {
                     bat "${MAVEN_HOME}/bin/mvn clean test"
                     withSonarQubeEnv('SonarQube') {
                         bat "${MAVEN_HOME}/bin/mvn sonar:sonar " +
-                            "-Dsonar.projectKey=Aggregation_Task " +
-                            "-Dsonar.projectName='Aggregation Task' " +
+                            "-Dsonar.projectKey=Aggregation_Demo_Task " +
+                            "-Dsonar.projectName='Aggregation Demo' " +
                             "-Dsonar.sources=src/main/java " +
                             "-Dsonar.java.binaries=target/classes"
                     }
@@ -51,17 +49,20 @@ pipeline {
                 expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {
-                echo "All tasks passed. Deploying artifacts to Staging..."
+                echo "All tasks passed successfully. Portfolio updated."
             }
         }
     }
 
     post {
-        failure {
-            echo "Build failed! Checking logs..."
+        always {
+            echo "Build process finished."
         }
         success {
-            echo "Everything is green! Portfolio is ready."
+            echo "SUCCESS: Both GridLayouts and AggregationDemo are verified!"
+        }
+        failure {
+            echo "FAILURE: Please check the logs to see which task failed."
         }
     }
 }
