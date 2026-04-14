@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // This must match the name of the Maven installation in Jenkins Global Tool Configuration
         MAVEN_HOME = tool 'LocalMaven' 
         SONAR_TOKEN = 'squ_e91e1e0944c40ffd75c196ec36c2249df02861bd'
     }
@@ -10,25 +9,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // This pulls the code from the GitHub repo I linked in the UI
                 checkout scm
             }
         }
 
-        stage('Build & Unit Test') {
+        // --- GRID LAYOUTS SECTION ---
+        stage('GridLayouts Task') {
             steps {
-                // We use dir() to tell Jenkins which assignment folder to enter
                 dir('GridLayouts') {
                     bat "${MAVEN_HOME}/bin/mvn clean test"
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                // This ensures SonarQube runs ONLY after the build/test succeeds
-                withSonarQubeEnv('SonarQube') {
-                    dir('GridLayouts') {
+                    withSonarQubeEnv('SonarQube') {
                         bat "${MAVEN_HOME}/bin/mvn sonar:sonar " +
                             "-Dsonar.projectKey=GridLayouts_Task " +
                             "-Dsonar.projectName='GridLayouts Task' " +
@@ -39,25 +29,39 @@ pipeline {
             }
         }
 
+        // --- NEW: AGGREGATION TASK SECTION ---
+        stage('Aggregation Task') {
+            steps {
+                // Ensure 'AggregationTask' matches your folder name exactly!
+                dir('AggregationTask') {
+                    bat "${MAVEN_HOME}/bin/mvn clean test"
+                    withSonarQubeEnv('SonarQube') {
+                        bat "${MAVEN_HOME}/bin/mvn sonar:sonar " +
+                            "-Dsonar.projectKey=Aggregation_Task " +
+                            "-Dsonar.projectName='Aggregation Task' " +
+                            "-Dsonar.sources=src/main/java " +
+                            "-Dsonar.java.binaries=target/classes"
+                    }
+                }
+            }
+        }
+
         stage('Deploy to Staging') {
-            // Point 4: Conditional deployment
             when {
                 expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {
-                echo "All stages passed. Deploying GridLayouts to Staging environment..."
-                // In a real project, this is where you'd copy the .jar file to a server
+                echo "All tasks passed. Deploying artifacts to Staging..."
             }
         }
     }
 
     post {
-        // Point 5: Handling failures
         failure {
-            echo "Building failed! Please check the Console Output for errors."
+            echo "Build failed! Checking logs..."
         }
         success {
-            echo "Build, Test, and Analysis were successful!"
+            echo "Everything is green! Portfolio is ready."
         }
     }
 }
