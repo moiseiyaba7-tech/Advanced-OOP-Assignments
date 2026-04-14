@@ -9,6 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                // Checkout the repository from SCM
                 checkout scm
             }
         }
@@ -16,14 +17,12 @@ pipeline {
         stage('GridLayouts Task') {
             steps {
                 dir('GridLayouts') {
+                    // Run Maven clean and test
                     bat "${MAVEN_HOME}/bin/mvn clean test"
+                    
                     withSonarQubeEnv('SonarQube') {
-                        // Use double quotes with backslashes for Windows compatibility
-                        bat "${MAVEN_HOME}/bin/mvn sonar:sonar " +
-                            "-Dsonar.projectKey=GridLayouts_Task " +
-                            "-Dsonar.projectName=\"GridLayouts Task\" " +
-                            "-Dsonar.sources=src/main/java " +
-                            "-Dsonar.java.binaries=target/classes"
+                        // We use \" to ensure Windows CMD handles the spaces in the project name correctly
+                        bat "${MAVEN_HOME}/bin/mvn sonar:sonar -Dsonar.projectKey=GridLayouts_Task \"-Dsonar.projectName=GridLayouts Task\" -Dsonar.sources=src/main/java -Dsonar.java.binaries=target/classes"
                     }
                 }
             }
@@ -32,13 +31,12 @@ pipeline {
         stage('Aggregation Task') {
             steps {
                 dir('AggregationDemo') {
+                    // Run Maven clean and test for the second project
                     bat "${MAVEN_HOME}/bin/mvn clean test"
+                    
                     withSonarQubeEnv('SonarQube') {
-                        bat "${MAVEN_HOME}/bin/mvn sonar:sonar " +
-                            "-Dsonar.projectKey=Aggregation_Demo_Task " +
-                            "-Dsonar.projectName=\"Aggregation Demo\" " +
-                            "-Dsonar.sources=src/main/java " +
-                            "-Dsonar.java.binaries=target/classes"
+                        // Applied the same fix here to prevent a future crash
+                        bat "${MAVEN_HOME}/bin/mvn sonar:sonar -Dsonar.projectKey=Aggregation_Demo_Task \"-Dsonar.projectName=Aggregation Demo\" -Dsonar.sources=src/main/java -Dsonar.java.binaries=target/classes"
                     }
                 }
             }
@@ -46,10 +44,11 @@ pipeline {
 
         stage('Deploy to Staging') {
             when {
+                // Only run if the previous stages were successful
                 expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {
-                echo "All tasks passed successfully."
+                echo "All tasks passed successfully. Ready for staging."
             }
         }
     }
@@ -59,10 +58,10 @@ pipeline {
             echo "Build process finished."
         }
         success {
-            echo "SUCCESS: Both GridLayouts and AggregationDemo are verified!"
+            echo "SUCCESS: Both GridLayouts and AggregationDemo are verified and analyzed!"
         }
         failure {
-            echo "FAILURE: Check Maven parameters for syntax errors."
+            echo "FAILURE: Please check the Jenkins logs for syntax or test errors."
         }
     }
 }
