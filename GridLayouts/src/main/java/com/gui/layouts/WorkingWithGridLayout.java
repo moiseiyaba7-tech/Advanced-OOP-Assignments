@@ -1,49 +1,24 @@
 package com.gui.layouts;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class WorkingWithGridLayout {
-    JFrame mainFrame;
-    JPanel panelOne;
-    JPanel panelTwo;
-    JPanel panelThree;
+    JFrame frame;
 
     public WorkingWithGridLayout() {
-        this.createJFrame();
-    }
+        frame = new JFrame("Grid Layout Demo");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 400);
+        frame.setLayout(new GridLayout(3, 1));
 
-    public JFrame createJFrame() {
-        mainFrame = new JFrame("Working with Layouts (GridLayouts)");
-        
-      
-        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel p1 = new JPanel(); p1.setBackground(Color.BLUE);
+        JPanel p2 = new JPanel(); p2.setBackground(Color.GREEN);
+        JPanel p3 = new JPanel(); p3.setBackground(Color.WHITE);
 
-        mainFrame.setLayout(new GridLayout(1, 3));
-
-        mainFrame.add(this.createPanelOne());
-        mainFrame.add(this.createPanelTwo());
-        mainFrame.add(this.createPanelThree());
-
-        mainFrame.setVisible(true);
-        return mainFrame;
-    }
-
-    public JPanel createPanelOne() {
-        panelOne = new JPanel();
-        panelOne.setBackground(Color.BLUE); 
-        return panelOne;
-    }
-
-    public JPanel createPanelTwo() {
-        panelTwo = new JPanel();
-        panelTwo.setBackground(Color.GREEN);
-        return panelTwo;
-    }
-
-    public JPanel createPanelThree() {
-        panelThree = new JPanel();
-        panelThree.setBackground(Color.WHITE);
-        return panelThree;
+        frame.add(p1);
+        frame.add(p2);
+        frame.add(p3);
+        frame.setVisible(true);
     }
 }

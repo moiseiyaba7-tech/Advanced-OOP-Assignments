@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Initialize') {
             steps {
-                cleanWs() // Deletes everything in the workspace folder immediately
+                cleanWs() // Wipes the workspace to prevent duplicate class errors
             }
         }
         stage('Checkout') {
@@ -19,8 +19,8 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('GridLayouts') {
-                    // Forces Maven to ignore any pre-compiled classes and rebuild everything
-                    bat 'mvn clean compile test -Dmaven.compiler.useIncrementalCompilation=false'
+                    // Forces total recompilation and sets Java 17 release
+                    bat 'mvn clean compile test -Dmaven.compiler.release=17 -Dmaven.compiler.useIncrementalCompilation=false'
                 }
             }
             post {
