@@ -1,4 +1,5 @@
 package com.gui.layouts;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.awt.*;
@@ -14,9 +15,7 @@ public class WorkingWithGridLayoutTest {
         assertTrue(frame.getLayout() instanceof GridLayout, "Layout should be GridLayout");
 
         assertEquals(Color.BLUE, app.createPanelOne().getBackground());
-        
         assertEquals(Color.GREEN, app.createPanelTwo().getBackground());
-        
         assertEquals(Color.WHITE, app.createPanelThree().getBackground());
         
         frame.dispose(); 

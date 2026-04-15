@@ -1,10 +1,12 @@
 pipeline {
     agent any
-    tools { maven 'LocalMaven' }
+    tools {
+        maven 'LocalMaven'
+    }
     stages {
         stage('Initialize') {
             steps {
-                deleteDir() // Physically wipes the workspace folder
+                cleanWs() // Deletes everything before the build starts
             }
         }
         stage('Checkout') {
@@ -17,8 +19,8 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('GridLayouts') {
-                    // Aggressive clean and forced re-compilation
-                    bat 'mvn clean compile test -Dmaven.compiler.useIncrementalCompilation=false'
+                    // -Drelease=17 fixes the "system modules" warning from your logs
+                    bat 'mvn clean compile test -Dmaven.compiler.release=17 -Dmaven.compiler.useIncrementalCompilation=false'
                 }
             }
             post {
