@@ -8,12 +8,14 @@ pipeline {
             steps {
                 git url: 'https://github.com/moiseiyaba7-tech/Advanced-OOP-Assignments.git', 
                     branch: 'main', 
-                    credentialsId: 'Github-token-pipe'
+                    credentialsId: 'github-token'
             }
         }
         stage('Build & Unit Test') {
             steps {
-                bat 'mvn clean test'
+                dir('GridLayouts') {
+                    bat 'mvn clean test'
+                }
             }
             post {
                 always {
@@ -23,8 +25,10 @@ pipeline {
         }
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    bat 'mvn sonar:sonar -Dsonar.token=squ_69fa4e871dcce8695e6f0f23cfa4396e3b8b57e5'
+                dir('GridLayouts') {
+                    withSonarQubeEnv('SonarQube') {
+                        bat 'mvn sonar:sonar -Dsonar.token=squ_69fa4e871dcce8695e6f0f23cfa4396e3b8b57e5'
+                    }
                 }
             }
         }
@@ -39,7 +43,7 @@ pipeline {
     }
     post {
         failure {
-            echo "Build failed. Check Maven logs or SonarQube token."
+            echo "Build failed. Check the Maven logs for duplicate classes or package errors."
         }
     }
 }
