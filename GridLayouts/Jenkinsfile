@@ -4,6 +4,11 @@ pipeline {
         maven 'LocalMaven'
     }
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/moiseiyaba7-tech/Advanced-OOP-Assignments.git', 
@@ -11,7 +16,7 @@ pipeline {
                     credentialsId: 'github-token'
             }
         }
-        stage('Build & Unit Test') {
+        stage('Build & Test') {
             steps {
                 dir('GridLayouts') {
                     bat 'mvn clean test'
@@ -31,19 +36,6 @@ pipeline {
                     }
                 }
             }
-        }
-        stage('Deploy to Staging') {
-            when {
-                expression { currentBuild.result == 'SUCCESS' }
-            }
-            steps {
-                echo "Deploying Grid Layout Application to Staging Environment..."
-            }
-        }
-    }
-    post {
-        failure {
-            echo "Build failed. Check the Maven logs for duplicate classes or package errors."
         }
     }
 }
