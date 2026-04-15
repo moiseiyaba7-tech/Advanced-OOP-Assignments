@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Initialize') {
             steps {
-                cleanWs() // Deletes everything before the build starts
+                cleanWs() // Deletes everything in the workspace folder immediately
             }
         }
         stage('Checkout') {
@@ -19,8 +19,8 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('GridLayouts') {
-                    // -Drelease=17 fixes the "system modules" warning from your logs
-                    bat 'mvn clean compile test -Dmaven.compiler.release=17 -Dmaven.compiler.useIncrementalCompilation=false'
+                    // Forces Maven to ignore any pre-compiled classes and rebuild everything
+                    bat 'mvn clean compile test -Dmaven.compiler.useIncrementalCompilation=false'
                 }
             }
             post {
