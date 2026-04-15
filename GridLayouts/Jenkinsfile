@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+    tools {
+        maven 'LocalMaven'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/moiseiyaba7-tech/Advanced-OOP-Assignments.git', 
+                    branch: 'main', 
+                    credentialsId: 'Github-token-pipe'
+            }
+        }
+        stage('Build & Unit Test') {
+            steps {
+                bat 'mvn clean test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    bat 'mvn sonar:sonar -Dsonar.token=squ_69fa4e871dcce8695e6f0f23cfa4396e3b8b57e5'
+                }
+            }
+        }
+        stage('Deploy to Staging') {
+            when {
+                expression { currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                echo "Deploying Grid Layout Application to Staging Environment..."
+            }
+        }
+    }
+    post {
+        failure {
+            echo "Build failed. Check Maven logs or SonarQube token."
+        }
+    }
+}
