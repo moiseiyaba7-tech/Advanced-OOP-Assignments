@@ -9,7 +9,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the repository from SCM
                 checkout scm
             }
         }
@@ -17,13 +16,17 @@ pipeline {
         stage('GridLayouts Task') {
             steps {
                 dir('GridLayouts') {
-                    // Run Maven clean and test
                     bat "${MAVEN_HOME}/bin/mvn clean test"
                     
                     withSonarQubeEnv('SonarQube') {
-                        // We use \" to ensure Windows CMD handles the spaces in the project name correctly
                         bat "${MAVEN_HOME}/bin/mvn sonar:sonar -Dsonar.projectKey=GridLayouts_Task \"-Dsonar.projectName=GridLayouts Task\" -Dsonar.sources=src/main/java -Dsonar.java.binaries=target/classes"
                     }
+                }
+            }
+            post {
+                always {
+                    // Captures GridLayouts test results
+                    junit 'GridLayouts/target/surefire-reports/*.xml'
                 }
             }
         }
@@ -31,20 +34,23 @@ pipeline {
         stage('Aggregation Task') {
             steps {
                 dir('AggregationDemo') {
-                    // Run Maven clean and test for the second project
                     bat "${MAVEN_HOME}/bin/mvn clean test"
                     
                     withSonarQubeEnv('SonarQube') {
-                        // Applied the same fix here to prevent a future crash
                         bat "${MAVEN_HOME}/bin/mvn sonar:sonar -Dsonar.projectKey=Aggregation_Demo_Task \"-Dsonar.projectName=Aggregation Demo\" -Dsonar.sources=src/main/java -Dsonar.java.binaries=target/classes"
                     }
+                }
+            }
+            post {
+                always {
+                    // Captures Aggregation test results
+                    junit 'AggregationDemo/target/surefire-reports/*.xml'
                 }
             }
         }
 
         stage('Deploy to Staging') {
             when {
-                // Only run if the previous stages were successful
                 expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {

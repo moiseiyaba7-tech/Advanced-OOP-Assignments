@@ -1,3 +1,5 @@
+package com.oop.assignments;
+
 class Player {
     String name;
     int age;
@@ -32,8 +34,8 @@ class Team {
     void showTeam() {
         System.out.println("Team: " + teamName);
         System.out.println("Team players:");
-        player1.showPlayer();
-        player2.showPlayer();
+        if (player1 != null) player1.showPlayer();
+        if (player2 != null) player2.showPlayer();
     }
 }
 
