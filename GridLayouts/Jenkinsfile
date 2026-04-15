@@ -1,9 +1,12 @@
 pipeline {
     agent any
-    tools {
-        maven 'LocalMaven'
-    }
+    tools { maven 'LocalMaven' }
     stages {
+        stage('Initialize') {
+            steps {
+                deleteDir() // Physically wipes the workspace folder
+            }
+        }
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/moiseiyaba7-tech/Advanced-OOP-Assignments.git', 
@@ -14,30 +17,23 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('GridLayouts') {
-                    bat 'mvn clean test'
+                    // Aggressive clean and forced re-compilation
+                    bat 'mvn clean compile test -Dmaven.compiler.useIncrementalCompilation=false'
                 }
             }
             post {
                 always {
-                    junit 'GridLayouts/target/surefire-reports/*.xml'
+                    junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
-        stage('SonarQube Analysis') {
+        stage('SonarQube') {
             steps {
                 dir('GridLayouts') {
                     withSonarQubeEnv('SonarQube') {
                         bat 'mvn sonar:sonar -Dsonar.token=squ_69fa4e871dcce8695e6f0f23cfa4396e3b8b57e5'
                     }
                 }
-            }
-        }
-        stage('Deploy to Staging') {
-            when {
-                expression { currentBuild.result == 'SUCCESS' }
-            }
-            steps {
-                echo "Deploying Grid Layout Application to Staging Environment..."
             }
         }
     }
